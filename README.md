@@ -1,30 +1,30 @@
 # Universal Robots Client Library
-   * [Universal Robots Client Library](#universal-robots-client-library)
-      * [Requirements](#requirements)
-      * [Build instructions](#build-instructions)
-         * [Plain cmake](#plain-cmake)
-         * [Inside a ROS workspace](#inside-a-ros-workspace)
-      * [Use this library in other projects](#use-this-library-in-other-projects)
-      * [License](#license)
-      * [Library contents](#library-contents)
-      * [Example driver](#example-driver)
-      * [Architecture](#architecture)
-         * [RTDEClient](#rtdeclient)
-            * [RTDEWriter](#rtdewriter)
-         * [ReverseInterface](#reverseinterface)
-         * [ScriptSender](#scriptsender)
-         * [Other public interface functions](#other-public-interface-functions)
-            * [check_calibration()](#check_calibration)
-            * [sendScript()](#sendscript)
-         * [DashboardClient](#dashboardclient)
-      * [A word on the primary / secondary interface](#a-word-on-the-primary--secondary-interface)
-      * [A word on Real-Time scheduling](#a-word-on-real-time-scheduling)
-      * [Producer / Consumer architecture](#producer--consumer-architecture)
-      * [Logging configuration](#logging-configuration)
-         * [Change logging level](#change-logging-level)
-         * [Create new log handler](#create-new-log-handler)
-         * [Console_bridge](#console_bridge)
-      * [Acknowledgement](#acknowledgement)
+- [Universal Robots Client Library](#universal-robots-client-library)
+  - [요구사항](#요구사항)
+  - [Build 방법](#build-방법)
+    - [Plain cmake](#plain-cmake)
+    - [ROS workspace 내부](#ros-workspace-내부)
+  - [다른 projects에서 이 library를 사용하기](#다른-projects에서-이-library를-사용하기)
+  - [License](#license)
+  - [Library contents](#library-contents)
+  - [예제 driver](#예제-driver)
+  - [Architecture](#architecture)
+    - [RTDEClient](#rtdeclient)
+      - [RTDEWriter](#rtdewriter)
+    - [ReverseInterface](#reverseinterface)
+    - [ScriptSender](#scriptsender)
+    - [Other public interface functions](#other-public-interface-functions)
+      - [`check_calibration()`](#check_calibration)
+      - [`sendScript()`](#sendscript)
+    - [DashboardClient](#dashboardclient)
+  - [A word on the primary / secondary interface](#a-word-on-the-primary--secondary-interface)
+  - [A word on Real-Time scheduling](#a-word-on-real-time-scheduling)
+  - [Producer / Consumer architecture](#producer--consumer-architecture)
+  - [Logging configuration](#logging-configuration)
+    - [Change logging level](#change-logging-level)
+    - [Create new log handler](#create-new-log-handler)
+  - [Contributor Guidelines](#contributor-guidelines)
+  - [Acknowledgment](#acknowledgment)
 
 
 Universal Robots 인터페이스에 접근하기 위한 C++ 라이브러리입니다. 이 라이브러리는 사용하면 C++ 기반 드라이버를 구현하여 외부 응용 프로그램을 만들 수 있으며, 이를 통해 Universal Robots 로봇 manipulators의 다양성을 활용할 수 있습니다.
@@ -182,15 +182,10 @@ script](resources/external_control.urscript)를 확인하세요.
 
 ### ScriptSender
 
-The `ScriptSender` class opens a tcp socket on the remote PC whose single purpose it is to answer
-with a URScript code snippet on a "*request_program*" request. The script code itself has to be
-given to the class constructor.
+`ScriptSender` 클래스는 원격 PC 상에서 TCP 소켓을 열고, "*request_program*" 요청에 대해 URScript 코드 스니펫으로 응답하는 단일 목적을 가집니다. 스크립트 코드 자체는 클래스 생성자에게 제공되어야 합니다.
 
-Use this class in conjunction with the [**External Control**
-URCap](https://github.com/UniversalRobots/Universal_Robots_ExternalControl_URCap) which will make
-the corresponding request when starting a program on the robot that contains the **External
-Control** program node. In order to work properly, make sure that the IP address and script sender
-port are configured correctly on the robot.
+이 클래스를 외부 제어 [**External Control**
+URCap](https://github.com/UniversalRobots/Universal_Robots_ExternalControl_URCap) 함께 사용하면 로봇에서 **External Control** 프로그램 node를 포함하는 프로그램을 시작할 때 해당 요청이 만들어 집니다. 제대로 작동하려면 로봇에서 IP 주소와 스크립트 송신 포트가 올바르게 구성되어 있는지 확인하십시오.
 
 ### Other public interface functions
 This section shall explain the public interface functions that haven't been covered above
@@ -206,60 +201,37 @@ This function sends given URScript code directly to the secondary interface. The
 `RTDEClient` constructor.
 
 ### DashboardClient
-The `DashboardClient` wraps the calls on the [Dashboard server](https://www.universal-robots.com/articles/ur-articles/dashboard-server-e-series-port-29999/) directly into C++ functions.
+`DashboardClient` 라이브러리는 [Dashboard server](https://www.universal-robots.com/articles/ur-articles/dashboard-server-e-series-port-29999/) 프로토콜에 대한 C++ 함수 인터페이스를 제공합니다.
 
-After connecting to the dashboard server by using the `connect()` function, dashboard calls can be
-sent using the `sendAndReceive()` function. Answers from the dashboard server will be returned as
-string from this function. If no answer is received, a `UrException` is thrown.
+`connect()` 함수를 이용하여 대시보드 서버에 연결 후
+`sendAndReceive()` 함수를 통해 대시보드 명령을 보낼 수 있습니다.
+대시보드 서버 응답은 문자열(string) 형태로 반환되며, 응답이 없는 경우 `UrException` 예외가 발생합니다.
 
-Note: In order to make this more useful developers are expected to wrap this bare interface into
-something that checks the returned string for something that is expected. See the
-[DashboardClientROS](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/blob/master/ur_robot_driver/include/ur_robot_driver/dashboard_client_ros.h) as an example.
+Note: 반환된 문자열이 예상하는 내용인지 검증하는 기능은 포함되어 있지 않습니다. 개발자는 반환값을 직접 검증하거나  [DashboardClientROS](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/blob/master/ur_robot_driver/include/ur_robot_driver/dashboard_client_ros.h) 예제 코드를 참고하여 보다 완성된 상위 클래스를 만들어 사용하는 것이 좋습니다.
 
 ## A word on the primary / secondary interface
-Currently, this library doesn't support the primary interface very well, as the [Universal Robots
-ROS driver](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver) was built mainly upon
-the RTDE interface. Therefore, there is also no `PrimaryClient` for directly accessing the primary
-interface. This may change in future, though.
+현재 이 라이브러리는 [Universal Robots
+ROS driver](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver)가 주로 RTDE 인터페이스를 기반으로 구축되었기 때문에 기본 인터페이스를 아주 잘 지원하지 않습니다. 따라서 기본 인터페이스에 직접 접근할 수 있는 `PrimaryClient`도 없습니다. 하지만 이는 향후 변경될 수도 있습니다.
 
-The `comm::URStream` class can be used to open a connection to the primary / secondary interface and
-send data to it. The [producer/consumer](#producer--consumer-architecture) pipeline structure can also be used
-together with the primary / secondary interface. However, package parsing isn't implemented for most
-packages currently. See the [`primary_pipeline` example](examples/primary_pipeline.cpp) on details
-how to set this up. Note that when running this example, most packages will just be printed as their
-raw byte streams in a hex notation, as they aren't implemented in the library, yet.
+`comm::URStream` 클래스를 사용하여 primary / secondary 인터페이스에 연결하고 데이터를 전송할 수 있습니다. 또한 [producer/consumer](#producer--consumer-architecture) 파이프라인 구조를 primary / secondary 인터페이스와 함께 사용할 수도 있습니다. 하지만 현재 대부분의 패키지에 대한 파싱 기능은 구현되어 있지 않습니다. 이 설정 방법에 대한 자세한 내용은 [`primary_pipeline` 예제](examples/primary_pipeline.cpp)를 참고하세요. 이 예제를 실행할 때, 라이브러리에 아직 구현되지 않았기 때문에 대부분의 패키지는 16진수 표기로 된 raw 바이트 스트림으로만 출력됩니다.
 
 ## A word on Real-Time scheduling
-As mentioned above, for a clean operation it is quite critical that arriving RTDE messages are read
-before the next message arrives. Due to this, both, the RTDE receive thread and the thread calling
-`getDataPackage()` should be scheduled with real-time priority. See [this guide](doc/real_time.md)
-for details on how to set this up.
+앞서 언급했듯이, clean operation을 위해서는 도착하는 RTDE 메시지가 다음 메시지가 도착하기 전에 읽혀지는 것이 매우 중요합니다. 이 때문에 RTDE 수신 스레드와 `getDataPackage()` 함수를 호출하는 스레드 모두 실시간 우선 순위로 스케줄링되어야 합니다. 설정 방법에 대한 자세한 내용은 [이 가이드](doc/real_time.md)를 참조하십시오.
 
-The RTDE receive thread will be scheduled to real-time priority automatically, if applicable. If
-this doesn't work, an error is raised at startup. The main thread calling `getDataPackage` should be
-scheduled to real-time priority by the application. See the
-[ur_robot_driver](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/blob/master/ur_robot_driver/src/hardware_interface_node.cpp)
-as an example.
+RTDE 수신 스레드는 해당되는 경우 자동으로 실시간 우선 순위로 스케줄링됩니다. 이것이 작동하지 않으면 시작 시점에 오류가 발생합니다. `getDataPackage`를 호출하는 메인 스레드는 응용 프로그램에서 실시간 우선 순위로 스케줄링되어야 합니다. 예제는 [ur_robot_driver](https://github.com/UniversalRobots/Universal_Robots_ROS_Driver/blob/master/ur_robot_driver/src/hardware_interface_node.cpp)를 참조하십시오.
 
 ## Producer / Consumer architecture
-Communication with the primary / secondary and RTDE interfaces is designed to use a
-consumer/producer pattern. The Producer reads data from the socket whenever it comes in, parses the
-contents and stores the parsed packages into a pipeline queue.
-You can write your own consumers that use the packages coming from the producer. See the
-[`comm::ShellConsumer`](include/ur_client_library/comm/shell_consumer.h) as an example.
+primary / secondary 인터페이스 및 RTDE 인터페이스와의 통신은 consumer/producer 패턴을 사용하도록 설계되었습니다.
+Producer는 소켓에서 데이터가 들어올 때마다 이를 읽고, 내용을 파싱하여 파싱된 패키지를 파이프라인 큐에 저장합니다.
+사용자는 producer로부터 제공되는 패키지를 사용하는 자신만의 consumers를 작성할 수 있습니다. 예제로  [`comm::ShellConsumer`](include/ur_client_library/comm/shell_consumer.h) 를 참조하세요.
 
 ## Logging configuration
-As this library was originally designed to be included into a ROS driver but also to be used as a
-standalone library, it uses custom logging macros instead of direct `printf` or `std::cout`
-statements.
+이 라이브러리는 원래 ROS 드라이버에 포함되도록 설계되었지만 독립 실행 라이브러리로도 사용될 수 있기 때문에, 직접적인 `printf` 또는 `std::cout` 대신에 커스텀 logging 매크로를 사용합니다.
 
-The macro based interface is by default using the [`DefaultLogHandler`](include/ur_client_library/default_log_handler.h)
-to print the logging messages as `printf` statements. It is possible to define your own log handler
-to change the behavior, [see create new log handler](#Create-new-log-handler) on how to.
+매크로 기반 인터페이스는 기본적으로 [`DefaultLogHandler`](include/ur_client_library/default_log_handler.h)를 사용하여 로깅 메시지를 `printf` 구문으로 출력합니다. 사용자 정의 로그 처리기를 정의하여 동작을 변경하는 것이 가능합니다.[새로운 로그 핸들러 생성하기](#Create-new-log-handler)를 참조하십시오.
 
 ### Change logging level
-Make sure to set the logging level in your application, as by default only messages of level
-WARNING or higher will be printed. See below for an example:
+응용 프로그램에서 로깅 레벨을 설정하세요. 기본적으로 WARNING 레벨 이상의 메시지만 출력됩니다.  아래 예시를 참조하세요.:
 ```c++
 #include "ur_client_library/log.h"
 
@@ -273,12 +245,9 @@ int main(int argc, char* argv[])
 ```
 
 ### Create new log handler
-The logger comes with an interface [`LogHandler`](include/ur_client_library/log.h), which can be
-used to implement your own log handler for messages logged with this library. This can be done by
-inheriting from the `LogHandler class`.
+logger는  라이브러리에서 로깅된 메시지에 대한 사용자 정의 로그 핸들러를 구현하기 위해 사용할 수 있는 인터페이스 [`LogHandler`](include/ur_client_library/log.h)를 제공합니다. 이는 `LogHandler class`를 상속받음으로써 구현할 수 있습니다.
 
-If you want to create a new log handler in your application, you can use below example as
-inspiration:
+만약 당신의 어플리케이션에서 새로운 로그 핸들러를 생성하고 싶다면, 아래 예시를 참고할 수 있습니다.:
 
 ```c++
 #include "ur_client_library/log.h"
@@ -327,20 +296,18 @@ int main(int argc, char* argv[])
 ```
 
 ## Contributor Guidelines
-* This repo supports [pre-commit](https://pre-commit.com/) e.g. for automatic code formatting. TLDR:
-  This will prevent you from committing falsely formatted code:
+* 이 repo는 자동 코드 포맷팅 등을 위한 [pre-commit](https://pre-commit.com/) 지원:
+  이를 통해 잘못 포맷팅된 코드를 커밋하는 것을 방지할 수 있습니다.:
   ```
   pipx install pre-commit
   pre-commit install
   ```
-* Succeeding pipelines are a must on Pull Requests (unless there is a reason, e.g. when there have
-been upstream changes).
-* We try to increase and keep our code coverage high, so PRs with new
-features should also have tests covering them.
-* Parameters of public methods must all be documented.
+* PULL 요청 시 파이프라인 성공은 필수입니다 (예를 들어, 상위 스트림 변경이 있었던 경우는 제외).
+* 코드 커버리지를 높이고 유지하려고 노력하고 있으므로 새로운 기능을 포함하는 PR에도 해당 기능을 테스트하는 코드가 함께 있어야 합니다.
+* 공개 메소드의 파라미터는 모두 문서화되어야 합니다.
 
 ## Acknowledgment
-Many parts of this library are forked from the [ur_modern_driver](https://github.com/ros-industrial/ur_modern_driver).
+이 라이브러리의 많은 부분들은 [ur_modern_driver](https://github.com/ros-industrial/ur_modern_driver) 에서 fork되었습니다.
 
 Developed in collaboration between:
 
